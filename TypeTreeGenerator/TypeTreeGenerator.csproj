@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<OutputType>Library</OutputType>
+		<FileAlignment>512</FileAlignment>
+		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+		<SelfContained>true</SelfContained>
+		<PublishTrimmed>true</PublishTrimmed>
+		<Platforms>AnyCPU;x86;x64</Platforms>
+		<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="ILRepack" Version="2.0.18" />
+	  <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.18.2" />
+	  <PackageReference Include="Mono.Cecil" Version="0.11.3" />
+	</ItemGroup>
+
+</Project>

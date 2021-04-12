@@ -1,5 +1,4 @@
-﻿using AssetStudio;
-using Mono.Cecil;
+﻿using Mono.Cecil;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,11 +6,14 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using AssetStudio;
 
-namespace TypeTreeExtractor
+namespace TypeTreeGeneratorCLI
 {
-    class Program
+    public class CLI
     {
+        public static Generator.Generator gen = new Generator.Generator();
+
         static void Main(string[] args)
         {
             if (args.Length == 0)
@@ -59,7 +61,7 @@ namespace TypeTreeExtractor
                         i++;
                         break;
                     case "-v":
-                        version = args[i + 1].Split(",").Select(int.Parse) as int[];
+                        version = args[i + 1].Split(',').Select(int.Parse) as int[];
                         i++;
                         break;
                     case "-d":
@@ -77,57 +79,59 @@ namespace TypeTreeExtractor
             }
 
             // load typedefs
-            AssemblyLoader assemblyLoader = new AssemblyLoader();
-            assemblyLoader.Load(assemblyFolder);
-
-            IEnumerable<TypeDefinition> typeDefs = (m_ClassName.Length > 0) ?
-                new List<TypeDefinition>() { GetType(m_AssemblyName, m_ClassName, m_Namespace, assemblyLoader) } :
-                GetAllTypes(m_AssemblyName, assemblyLoader);
-
-            byte[] data;
+            gen.loadFolder(assemblyFolder);
+            IEnumerable<TypeDefinition> typeDefs = gen.getTypeDefs(m_AssemblyName, m_ClassName, m_Namespace);
+            string str = "";
+            byte[] data = new byte[] { };
             switch (dump)
             {
                 case "simple":
-                    string str = simpleDump(typeDefs, version).ToString();
-                    Console.WriteLine(zip ? Convert.ToBase64String(Zip(Encoding.UTF8.GetBytes(str))) : str);
+                    str = simpleDump(typeDefs, version).ToString();
                     break;
                 case "json":
                     data = jsonDump(typeDefs, version, true);
-                    Console.WriteLine(zip ? Convert.ToBase64String(Zip(data)) : Encoding.UTF8.GetString(data));
                     break;
                 case "json_min":
                     data = jsonDump(typeDefs, version, false);
-                    Console.WriteLine(zip ? Convert.ToBase64String(Zip(data)) : Encoding.UTF8.GetString(data));
                     break;
                 case "bin":
                     data = binDump(typeDefs, version);
-                    Console.WriteLine(Convert.ToBase64String(zip ? Zip(data) : data));
                     break;
             }
+            Dump(str, data, zip, output);
         }
 
-        public static List<TypeTreeNode> ConvertToTypeTreeNodes(TypeDefinition typeDef, int[] version)
+        public static void Dump(string str, byte[] data, bool zip, string outpath)
         {
-            var nodes = new List<TypeTreeNode>();
-            var helper = new SerializedTypeHelper(version);
-            helper.AddMonoBehaviour(nodes, 0);
-            if (typeDef != null)
+            if (outpath.Length > 0)
             {
-                var typeDefinitionConverter = new TypeDefinitionConverter(typeDef, helper, 1);
-                nodes.AddRange(typeDefinitionConverter.ConvertToTypeTreeNodes());
+                if (data.Length == 0)
+                {
+                    data = Encoding.UTF8.GetBytes(str);
+                }
+                if (zip)
+                {
+                    data = Zip(data);
+                }
+                File.OpenWrite(outpath).Write(data);
             }
-            return nodes;
-        }
+            else
+            {
+                if (zip)
+                {
+                    if (str.Length > 0)
+                    {
+                        data = Encoding.UTF8.GetBytes(str);
+                    }
+                    data = Zip(data);
+                }
+                if (data.Length > 0)
+                {
+                    str = Convert.ToBase64String(data);
+                }
+                Console.WriteLine(str);
+            }
 
-        public static TypeDefinition GetType(string m_AssemblyName, string m_ClassName,
-            string m_Namespace, AssemblyLoader assemblyLoader)
-        {
-            return assemblyLoader.GetTypeDefinition(m_AssemblyName, string.IsNullOrEmpty(m_Namespace) ? m_ClassName : $"{m_Namespace}.{m_ClassName}");
-        }
-
-        public static IEnumerable<TypeDefinition> GetAllTypes(string m_AssemblyName, AssemblyLoader assemblyLoader)
-        {
-            return assemblyLoader.GetTypeDefinitions(m_AssemblyName);
         }
 
         public static StringBuilder simpleDump(IEnumerable<TypeDefinition> typeDefs, int[] version)
@@ -137,7 +141,7 @@ namespace TypeTreeExtractor
             {
                 try
                 {
-                    List<TypeTreeNode> nodes = Program.ConvertToTypeTreeNodes(typeDef, version);
+                    List<TypeTreeNode> nodes = gen.convertToTypeTreeNodes(typeDef, version);
                     sb.AppendLine(typeDef.Name);
                     foreach (TypeTreeNode node in nodes)
                     {
@@ -164,7 +168,7 @@ namespace TypeTreeExtractor
                 try
                 {
                     key = typeDef.Namespace.Length > 0 ? $"{typeDef.Namespace}.{typeDef.Name}" : typeDef.Name;
-                    nodes = Program.ConvertToTypeTreeNodes(typeDef, version);
+                    nodes = gen.convertToTypeTreeNodes(typeDef, version);
                     if (nodes.Count > 0) nodeDict.Add(key, nodes);
                 }
                 catch { continue; }
@@ -177,6 +181,13 @@ namespace TypeTreeExtractor
             return JsonSerializer.SerializeToUtf8Bytes(nodeDict, options);
         }
 
+        public static void writeString(MemoryStream s, string str)
+        {
+            byte[] bin = Encoding.UTF8.GetBytes(str);
+            s.WriteByte((byte)bin.Length);
+            s.Write(bin, (int)s.Length, bin.Length);
+        }
+
         public static byte[] binDump(IEnumerable<TypeDefinition> typeDefs, int[] version)
         {
             MemoryStream s = new MemoryStream();
@@ -187,16 +198,16 @@ namespace TypeTreeExtractor
                 try
                 {
                     key = typeDef.Namespace.Length > 0 ? $"{typeDef.Namespace}.{typeDef.Name}" : typeDef.Name;
-                    nodes = Program.ConvertToTypeTreeNodes(typeDef, version);
+                    nodes = gen.convertToTypeTreeNodes(typeDef, version);
                     if (nodes.Count == 0) continue;
-                    s.Write(Encoding.UTF8.GetBytes(key));
-                    s.Write(BitConverter.GetBytes((UInt32)nodes.Count));
+                    writeString(s, key);
+                    s.Write(BitConverter.GetBytes((UInt32)nodes.Count), (int)s.Length, 4);
                     foreach (var node in nodes)
                     {
-                        s.Write(BitConverter.GetBytes(node.m_Level));
-                        s.Write(Encoding.UTF8.GetBytes(node.m_Type));
-                        s.Write(Encoding.UTF8.GetBytes(node.m_Name));
-                        s.Write(BitConverter.GetBytes(node.m_MetaFlag));
+                        s.Write(BitConverter.GetBytes(node.m_Level), (int)s.Length, 4);
+                        writeString(s, node.m_Type);
+                        writeString(s, node.m_Name);
+                        s.Write(BitConverter.GetBytes(node.m_MetaFlag), (int)s.Length, 4);
                     }
                 }
                 catch { continue; }

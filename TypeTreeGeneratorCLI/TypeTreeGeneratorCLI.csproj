@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<OutputType>Exe</OutputType>
+		<Platforms>AnyCPU;x86;x64</Platforms>
+		<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Mono.Cecil" Version="0.11.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\TypeTreeGenerator\TypeTreeGenerator.csproj" />
+	</ItemGroup>
+
+</Project>
