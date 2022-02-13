@@ -11,5 +11,6 @@ __Argumens__
   * -d  ~ dump style (simple, json, json_min, bin)
   * -z  ~ if used, the data will be compressed via gzip
   * -o  ~ output path (instead of printing the data will be stored in the given path) //TODO
+  * -v  ~ version seperated by , e.g. 2018,1,2,0
 
 All binary formats (bin, compressed) are displayed as base64 string.
