@@ -38,7 +38,7 @@ namespace TypeTreeGeneratorCLI
             string m_AssemblyName = "";
             string m_ClassName = "";
             string m_Namespace = "";
-            int[] version = { 0, 0, 0, 0 };
+            int[] version = null;
             string dump = "simple";
             bool zip = false;
             string output = "";
@@ -82,6 +82,11 @@ namespace TypeTreeGeneratorCLI
                         i++;
                         break;
                 }
+            }
+            if (version == null)
+            {
+                Console.WriteLine("No version was set!");
+                return;
             }
 
             // load typedefs
