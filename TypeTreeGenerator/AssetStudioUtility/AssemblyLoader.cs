@@ -7,7 +7,7 @@ namespace AssetStudio
     public class AssemblyLoader
     {
         public bool Loaded;
-        private Dictionary<string, ModuleDefinition> moduleDic = new Dictionary<string, ModuleDefinition>();
+        public Dictionary<string, ModuleDefinition> moduleDic = new Dictionary<string, ModuleDefinition>();
 
         public void Load(string path)
         {
@@ -52,6 +52,11 @@ namespace AssetStudio
             return null;
         }
 
+        public IEnumerable<TypeDefinition> GetTypeDefinitions(string assemblyName)
+        {
+            return moduleDic.TryGetValue(assemblyName, out var module) ? module.GetTypes() : null;
+        }
+
         public void Clear()
         {
             foreach (var pair in moduleDic)
@@ -60,11 +65,6 @@ namespace AssetStudio
             }
             moduleDic.Clear();
             Loaded = false;
-        }
-
-        public IEnumerable<TypeDefinition> GetTypeDefinitions(string assemblyName)
-        {
-            return moduleDic.TryGetValue(assemblyName, out var module) ? module.GetTypes() : null;
         }
     }
 }

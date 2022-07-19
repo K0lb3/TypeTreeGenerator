@@ -7,7 +7,7 @@ namespace Generator
 {
     public class Generator
     {
-        private AssemblyLoader assemblyLoader = new AssemblyLoader();
+        public AssemblyLoader assemblyLoader = new AssemblyLoader();
 
         public void loadFolder(string assemblyFolder)
         {

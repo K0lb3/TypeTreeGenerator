@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using AssetStudio;
 
 namespace TypeTreeGeneratorCLI
@@ -23,6 +24,7 @@ namespace TypeTreeGeneratorCLI
 "Argumens:\n" +
 "-p  ~ assembly folder path (required)\n" +
 "-a  ~ assembly name (required)\n" +
+"-v  ~ unity version (required)\n" +
 "-c  ~ class name (if not set, all classes will be dumped)\n" +
 "-n  ~ namespace (optional for set class name)\n" +
 "-d  ~ dump style (simple, json, json_min, bin)\n" +
@@ -61,7 +63,11 @@ namespace TypeTreeGeneratorCLI
                         i++;
                         break;
                     case "-v":
-                        version = args[i + 1].Split(',').Select(int.Parse) as int[];
+                        // from AssetStudio
+                        var unityVersion = args[i+1];
+                        var buildSplit = Regex.Replace(unityVersion, @"\d", "").Split(new[] { "." }, StringSplitOptions.RemoveEmptyEntries);
+                        var versionSplit = Regex.Replace(unityVersion, @"\D", ".").Split(new[] { "." }, StringSplitOptions.RemoveEmptyEntries);
+                        version = versionSplit.Select(int.Parse).ToArray();
                         i++;
                         break;
                     case "-d":
@@ -81,6 +87,17 @@ namespace TypeTreeGeneratorCLI
             // load typedefs
             gen.loadFolder(assemblyFolder);
             IEnumerable<TypeDefinition> typeDefs = gen.getTypeDefs(m_AssemblyName, m_ClassName, m_Namespace);
+            if (typeDefs == null)
+            {
+                Console.WriteLine("Failed to get type definitions.");
+                Console.WriteLine("Make sure to use the correct assembly name!");
+                Console.WriteLine("Loaded assemblies:");
+                foreach (var item in gen.assemblyLoader.moduleDic)
+                {
+                    Console.WriteLine(item.Key);
+                }
+                return;
+            }
             string str = "";
             byte[] data = new byte[] { };
             switch (dump)
@@ -176,6 +193,7 @@ namespace TypeTreeGeneratorCLI
             var options = new JsonSerializerOptions
             {
                 WriteIndented = indented,
+
 
             };
             return JsonSerializer.SerializeToUtf8Bytes(nodeDict, options);
