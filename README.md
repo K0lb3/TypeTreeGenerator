@@ -22,3 +22,6 @@ All binary formats (bin, compressed) are displayed as base64 string.
 ```
 
 Linux and Mac users have to use the .exe as well.
+
+In case it boots up wine for them,
+they can try ``dotnet ./TypeTreeGeneratorCLI.dll`` instead of ``./TypeTreeGeneratorCLI.exe``.
