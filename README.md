@@ -18,7 +18,7 @@ All binary formats (bin, compressed) are displayed as base64 string.
 ### Example
 
 ```bash
-./TypeTreeGeneratorCLI.exe -p ".\DummyDll" -a "Assembly-CSharp.dll" -v "2018.4.36f1" -d json -o "./assembly-csharp.json"
+./TypeTreeGeneratorCLI.exe -p "./DummyDll" -a "Assembly-CSharp.dll" -v "2018.4.36f1" -d json -o "./assembly-csharp.json"
 ```
 
 Linux and Mac users have to use the .exe as well.
