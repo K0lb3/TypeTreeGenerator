@@ -25,3 +25,7 @@ Linux and Mac users have to use the .exe as well.
 
 In case it boots up wine for them,
 they can try ``dotnet ./TypeTreeGeneratorCLI.dll`` instead of ``./TypeTreeGeneratorCLI.exe``.
+
+### Download
+
+Check [Releases](releases/)
