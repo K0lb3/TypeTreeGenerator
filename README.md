@@ -28,4 +28,4 @@ they can try ``dotnet ./TypeTreeGeneratorCLI.dll`` instead of ``./TypeTreeGenera
 
 ### Download
 
-Check [Releases](releases/)
+Builds can be downloaded from [Releases](https://github.com/K0lb3/TypeTreeGenerator/releases/).
