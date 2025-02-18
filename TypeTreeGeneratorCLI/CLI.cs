@@ -36,7 +36,7 @@ namespace TypeTreeGeneratorCLI
             }
             string assemblyFolder = "";
             string m_AssemblyName = "";
-            string m_ClassName = "";
+            List<string> m_ClassNames = new();
             string m_Namespace = "";
             int[] version = null;
             string dump = "simple";
@@ -55,7 +55,7 @@ namespace TypeTreeGeneratorCLI
                         i++;
                         break;
                     case "-c":
-                        m_ClassName = args[i + 1];
+                        m_ClassNames.Add(args[i + 1]);
                         i++;
                         break;
                     case "-n":
@@ -91,7 +91,7 @@ namespace TypeTreeGeneratorCLI
 
             // load typedefs
             gen.loadFolder(assemblyFolder);
-            IEnumerable<TypeDefinition> typeDefs = gen.getTypeDefs(m_AssemblyName, m_ClassName, m_Namespace);
+            IEnumerable<TypeDefinition> typeDefs = gen.getTypeDefs(m_AssemblyName, m_ClassNames, m_Namespace);
             if (typeDefs == null)
             {
                 Console.WriteLine("Failed to get type definitions.");
