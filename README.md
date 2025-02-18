@@ -1,5 +1,7 @@
 # Typetree Generator
 
+**DEPRECATED in favor of [TypeTreeGeneratorAPI](https://github.com/K0lb3/TypeTreeGeneratorAPI)**
+
 A simple **cross-platform** CLI port of [Perfare's MonoBehaviourConverter](https://github.com/Perfare/AssetStudio/blob/master/AssetStudioUtility/MonoBehaviourConverter.cs) into a CLI application.
 Unity.CecilTools and Unity.SerializationLogic are from the official [UnityCSReference](https://github.com/Unity-Technologies/UnityCsReference).
 
